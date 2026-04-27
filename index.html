@@ -36,10 +36,22 @@
         document.getElementById('timer').innerText = `Do konce zbývá: ${Math.floor(zbyvaMin / 60)}h ${zbyvaMin % 60}m`;
 
         const tymy = {
-            "Zelená": { "Elektrikáři": [["Ulrych Roman", "77585459"], ["Reder Adam", "775429859"]], "Mechanici": [["Holinka Stanislav", "775432115"]] },
-            "Červená": { "Elektrikáři": [["Zezulka Miroslav", "778760406"]], "Mechanici": [["Bolom Jakub", "778483878"], ["Šimečka Rudolf", "770143579"]] },
-            "Modrá": { "Elektrikáři": [["Marsina Adam", "775854589"]], "Mechanici": [["Petrovský Jan", "770163278"]] },
-            "Šedá": { "Elektrikáři": [["Průcha Josef", "770131860"]], "Mechanici": [["Schuma Daniel", "775883497"]] }
+            "Zelená": { 
+                "Elektrikáři": [["Ulrych Roman", "775854592"], ["Reder Adam", "775429859"], ["Kyselý Jan", "770319118"]], 
+                "Mechanici": [["Holinka Stanislav", "775432115"], ["Neubert Kamil", "778745583"], ["Paťorek Martin", "770143578"]] 
+            },
+            "Červená": { 
+                "Elektrikáři": [["Zezulka Miroslav", "778760406"], ["Vitásek Martin", "778745584"], ["Tellinger Rostislav", "773795395"]], 
+                "Mechanici": [["Bolom Jakub", "778483878"], ["Broda Martin", "778482415"], ["Šimečka Rudolf", "770143579"]] 
+            },
+            "Modrá": { 
+                "Elektrikáři": [["Marsina Adam", "775854589"], ["Petrovský Jan", "770163278"], ["Ertel Tomáš", "778439051"]], 
+                "Mechanici": [["Libiger Milan", "770181306"], ["Kostelník Martin", "778499086"], ["Vinkler Antonín", "778725420"]] 
+            },
+            "Šedá": { 
+                "Elektrikáři": [["Průcha Josef", "770131860"], ["Schuma Daniel", "775883497"]], 
+                "Mechanici": [["Genčur Miroslav", "775541160"], ["Wimmer Jan", "773745213"], ["Vondrášek Jiří", "778499082"]] 
+            }
         };
 
         let html = "";
