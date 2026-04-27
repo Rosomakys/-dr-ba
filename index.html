@@ -1,29 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smeny 2026</title>
+    <title>Údržba - Služby</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
-        .box { padding: 40px; border-radius: 15px; font-size: 2rem; font-weight: bold; }
-        .Zelená { background: #28a745; }
-        .Červená { background: #dc3545; }
-        .Modrá { background: #007bff; }
-        .Šedá { background: #6c757d; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #121212; color: #e0e0e0; margin: 0; padding: 20px; text-align: center; }
+        .box { padding: 20px; border-radius: 12px; margin-bottom: 20px; font-size: 1.5rem; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .Zelená { background: #2e7d32; color: white; }
+        .Červená { background: #c62828; color: white; }
+        .Modrá { background: #1565c0; color: white; }
+        .Šedá { background: #424242; color: white; }
+        .kontakt-karta { background: #1e1e1e; padding: 15px; margin: 10px 0; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+        a { color: #81d4fa; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
-    <h1>Aktuální směna</h1>
+    <h1>Údržba</h1>
     <div id="vysledek" class="box">Načítám...</div>
+    <div id="kontakty"></div>
+
     <script>
-        const smeny = { "2026-04-27": {"den": "Zelená", "noc": "Červená"} };
+        // Tady bude kalendář (zatím příklad, doplň podle papíru)
+        const kalendar = { "2026-04-27": {"den": "Zelená", "noc": "Červená"} };
+        
+        const lide = {
+            "Zelená": [["Ulrych Roman", "77585459"], ["Reder Adam", "775429859"], ["Kyselý Jan", "770319118"], ["Holinka Stanislav", "775432115"], ["Neubert Kamil", "778745583"], ["Paťorek Martin", "770143578"]],
+            "Modrá": [["Marsina Adam", "775854589"], ["Petrovský Jan", "770163278"], ["Ertel Tomáš", "778439051"], ["Libiger Milan", "770181306"], ["Kostelník Martin", "778499086"], ["Vinkler Antonín", "778725420"]],
+            "Červená": [["Zezulka Miroslav", "778760406"], ["Vitásek Martin", "778745584"], ["Tellinger Rostislav", "773795395"], ["Bolom Jakub", "778483878"], ["Broda Martin", "778482415"], ["Šimečka Rudolf", "770143579"]],
+            "Šedá": [["Průcha Josef", "770131860"], ["Schuma Daniel", "775883497"], ["Genčur Miroslav", "775541160"], ["Wimmer Jan", "773745213"], ["Vondrášek Jiří", "778499082"]]
+        };
+
         const d = new Date();
-        const datum = d.toISOString().split('T')[0];
+        const dnes = d.toISOString().split('T')[0];
         const h = d.getHours();
-        const s = smeny[datum] ? (h >= 6 && h < 18 ? smeny[datum].den : smeny[datum].noc) : "Není v kalendáři";
-        document.getElementById('vysledek').className = 'box ' + s;
-        document.getElementById('vysledek').innerText = s;
+        const smena = kalendar[dnes] ? (h >= 6 && h < 18 ? kalendar[dnes].den : kalendar[dnes].noc) : "Není v plánu";
+        
+        document.getElementById('vysledek').className = 'box ' + smena;
+        document.getElementById('vysledek').innerText = "Právě je: " + smena;
+
+        if(lide[smena]) {
+            document.getElementById('kontakty').innerHTML = "<h3>Kontakty:</h3>" + 
+            lide[smena].map(o => `<div class='kontakt-karta'><span>${o[0]}</span><a href='tel:${o[1]}'>${o[1]}</a></div>`).join('');
+        }
     </script>
 </body>
 </html>
