@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smeny 2026</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #121212; color: white; }
+        .box { padding: 40px; border-radius: 15px; font-size: 2rem; font-weight: bold; }
+        .Zelená { background: #28a745; }
+        .Červená { background: #dc3545; }
+        .Modrá { background: #007bff; }
+        .Šedá { background: #6c757d; }
+    </style>
+</head>
+<body>
+    <h1>Aktuální směna</h1>
+    <div id="vysledek" class="box">Načítám...</div>
+    <script>
+        const smeny = { "2026-04-27": {"den": "Zelená", "noc": "Červená"} };
+        const d = new Date();
+        const datum = d.toISOString().split('T')[0];
+        const h = d.getHours();
+        const s = smeny[datum] ? (h >= 6 && h < 18 ? smeny[datum].den : smeny[datum].noc) : "Není v kalendáři";
+        document.getElementById('vysledek').className = 'box ' + s;
+        document.getElementById('vysledek').innerText = s;
+    </script>
+</body>
+</html>
