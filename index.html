@@ -36,17 +36,20 @@
     <div id="kontakty-vypis"></div>
 
     <script>
-        // Start: Pondělí 27.4.2026
         const startDatum = new Date("2026-04-27T00:00:00"); 
 
-        // 14denní cyklus rotace (krátký / dlouhý týden)
         const ranniCyklus = [
-            "Zelená", "Zelená", "Červená", "Červená", "Zelená", "Zelená", "Zelená",
-            "Červená", "Červená", "Zelená", "Zelená", "Červená", "Červená", "Červená"
+            "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená", "Zelená", 
+            "Červená", "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", 
+            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", 
+            "Modrá", "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá"
         ];
+        
         const nocniCyklus = [
-            "Modrá", "Modrá", "Šedá", "Šedá", "Modrá", "Modrá", "Modrá",
-            "Šedá", "Šedá", "Modrá", "Modrá", "Šedá", "Šedá", "Šedá"
+            "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá", "Modrá", 
+            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", 
+            "Červená", "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", 
+            "Zelená", "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená"
         ];
 
         const lide = {
@@ -73,66 +76,14 @@
             const h = ted.getHours();
             const m = ted.getMinutes();
             
-            // Určení "logického" dne. Noc do 5:59 patří k předchozímu datu.
             let logickyDen = new Date(ted.getTime());
             if (h < 6) {
                 logickyDen.setDate(logickyDen.getDate() - 1);
             }
             logickyDen.setHours(0, 0, 0, 0);
 
-            // Výpočet dnů od začátku cyklu
             const rozdilMs = logickyDen.getTime() - startDatum.getTime();
             let rozdilDnu = Math.floor(rozdilMs / (1000 * 60 * 60 * 24));
-            while (rozdilDnu < 0) rozdilDnu += 14; 
+            while (rozdilDnu < 0) rozdilDnu += 28; 
             
-            const denVCyklu = rozdilDnu % 14;
-            const jeRanni = (h >= 6 && h < 18);
-
-            // Zjištění aktuální a příští směny
-            let aktualniBarva;
-            let pristiBarva;
-
-            if (jeRanni) {
-                aktualniBarva = ranniCyklus[denVCyklu];
-                pristiBarva = nocniCyklus[denVCyklu];
-            } else {
-                aktualniBarva = nocniCyklus[denVCyklu];
-                const pristiDenVCyklu = (denVCyklu + 1) % 14;
-                pristiBarva = ranniCyklus[pristiDenVCyklu];
-            }
-
-            // Vykreslení hlavičky
-            const hlavni = document.getElementById('hlavni');
-            hlavni.className = 'hlavni-karta ' + aktualniBarva;
-            document.getElementById('smena-text').innerText = aktualniBarva;
-            document.getElementById('priste-text').innerText = "Příště: " + pristiBarva;
-
-            // Správný odpočet
-            let zbyvaMin;
-            if (jeRanni) {
-                zbyvaMin = (18 * 60) - (h * 60 + m);
-            } else {
-                if (h >= 18) {
-                    zbyvaMin = ((24 - h) * 60 - m) + (6 * 60);
-                } else {
-                    zbyvaMin = (6 * 60) - (h * 60 + m);
-                }
-            }
-            document.getElementById('timer').innerText = `Končí za: ${Math.floor(zbyvaMin/60)}h ${zbyvaMin%60}m`;
-
-            // Vykreslení kontaktů
-            let html = "";
-            for (let profese in lide[aktualniBarva]) {
-                html += `<div class="nadpis-sekce">${profese}</div>`;
-                lide[aktualniBarva][profese].forEach(p => {
-                    html += `<div class="kontakt-row"><span class="jmeno">${p[0]}</span><a href="tel:${p[1]}" class="cislo">${p[1]}</a></div>`;
-                });
-            }
-            document.getElementById('kontakty-vypis').innerHTML = html;
-        }
-
-        setInterval(aktualizuj, 60000);
-        aktualizuj();
-    </script>
-</body>
-</html>
+            const denVCy
