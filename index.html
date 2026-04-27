@@ -5,17 +5,17 @@
     <title>Údržba - Služby</title>
     <style>
         body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; padding: 20px; }
-        .box { padding: 25px; border-radius: 12px; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
+        .box { padding: 20px; border-radius: 12px; font-size: 1.5rem; font-weight: bold; margin-bottom: 10px; }
         .Zelená { background: #2e7d32; } .Červená { background: #c62828; }
         .Modrá { background: #1565c0; } .Šedá { background: #424242; }
-        #timer { font-size: 1rem; color: #aaa; margin-bottom: 20px; }
-        .sekce { text-align: left; margin: 15px 0; border-top: 1px solid #444; padding-top: 10px; }
+        #timer { font-size: 0.9rem; color: #aaa; margin-bottom: 20px; }
+        .sekce { text-align: left; margin-top: 20px; }
         .karta { background: #1e1e1e; padding: 12px; margin: 6px 0; border-radius: 6px; display: flex; justify-content: space-between; }
         a { color: #81d4fa; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div id="vysledek" class="box">Načítám...</div>
+    <div id="vysledek" class="box"></div>
     <div id="timer"></div>
     <div id="kontakty"></div>
 
@@ -23,24 +23,17 @@
         const cyklus = ["Zelená", "Modrá", "Červená", "Šedá"]; 
         const startDate = new Date("2026-04-27");
         
-        function aktualizuj() {
-            const d = new Date();
-            const h = d.getHours();
-            
-            // Logika směny
-            const diff = Math.floor((d - startDate) / (1000 * 60 * 60 * 24));
-            const smena = (h >= 6 && h < 18) ? cyklus[(diff + 2) % 4] : cyklus[(diff + 1) % 4];
-            
-            document.getElementById('vysledek').className = 'box ' + smena;
-            document.getElementById('vysledek').innerText = "Právě je: " + smena;
+        const d = new Date();
+        const h = d.getHours();
+        const diff = Math.floor((d - startDate) / (1000 * 60 * 60 * 24));
+        const smena = (h >= 6 && h < 18) ? cyklus[(diff + 2) % 4] : cyklus[(diff + 1) % 4];
+        
+        document.getElementById('vysledek').className = 'box ' + smena;
+        document.getElementById('vysledek').innerText = "Směna: " + smena;
 
-            // Odpočet
-            const konecH = (h >= 6 && h < 18) ? 18 : 30; // 30 je 6 ráno druhý den
-            const zbyvaMin = (konecH * 60) - (h * 60 + d.getMinutes());
-            const hod = Math.floor(zbyvaMin / 60);
-            const min = zbyvaMin % 60;
-            document.getElementById('timer').innerText = `Do konce směny zbývá: ${hod}h ${min}m`;
-        }
+        const konecH = (h >= 6 && h < 18) ? 18 : 30;
+        const zbyvaMin = (konecH * 60) - (h * 60 + d.getMinutes());
+        document.getElementById('timer').innerText = `Do konce zbývá: ${Math.floor(zbyvaMin / 60)}h ${zbyvaMin % 60}m`;
 
         const tymy = {
             "Zelená": { "Elektrikáři": [["Ulrych Roman", "77585459"], ["Reder Adam", "775429859"]], "Mechanici": [["Holinka Stanislav", "775432115"]] },
@@ -49,9 +42,12 @@
             "Šedá": { "Elektrikáři": [["Průcha Josef", "770131860"]], "Mechanici": [["Schuma Daniel", "775883497"]] }
         };
 
-        // Zobrazení kontaktů (zjednodušeno pro příklad)
-        // ... (zbytek logiky jako minule)
-        aktualizuj();
+        let html = "";
+        for (let profese in tymy[smena]) {
+            html += `<div class='sekce'><h3>${profese}</h3>` + tymy[smena][profese].map(o => 
+                `<div class='karta'><span>${o[0]}</span><a href='tel:${o[1]}'>${o[1]}</a></div>`).join('') + "</div>";
+        }
+        document.getElementById('kontakty').innerHTML = html;
     </script>
 </body>
 </html>
