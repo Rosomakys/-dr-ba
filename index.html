@@ -8,7 +8,7 @@
         * { box-sizing: border-box; }
         body { font-family: -apple-system, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; overflow-x: hidden; }
         
-        .hlavni-karta { padding: 15px; border-radius: 12px; margin-bottom: 8px; text-align: center; }
+        .hlavni-karta { padding: 15px; border-radius: 12px; margin-bottom: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
         .Zelená { background: #1b5e20; }
         .Červená { background: #b71c1c; }
         .Modrá { background: #0d47a1; }
@@ -36,22 +36,26 @@
     <div id="kontakty-vypis"></div>
 
     <script>
+        // Start: Pondělí 27.4.2026 (Zkušební bod podle obrázku)
         const startDatum = new Date("2026-04-27T00:00:00"); 
 
+        // --- SUPER-PŘESNÝ 28DENNÍ CYKLUS PODLE PAPÍRU ---
+        // Každý řádek reprezentuje jeden týden
         const ranniCyklus = [
-            "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená", "Zelená", 
-            "Červená", "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", 
-            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", 
-            "Modrá", "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá"
+            "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená", "Zelená", // Týden 1
+            "Červená", "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", // Týden 2
+            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", // Týden 3
+            "Modrá", "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá"  // Týden 4
         ];
         
         const nocniCyklus = [
-            "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá", "Modrá", 
-            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", 
-            "Červená", "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", 
-            "Zelená", "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená"
+            "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", "Červená", // Týden 1
+            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", // Týden 2
+            "Modrá", "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá", // Týden 3
+            "Zelená", "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená"  // Týden 4
         ];
 
+        // --- KONTAKTY ---
         const lide = {
             "Zelená": {
                 "Elektrikáři": [["Ulrych Roman", "775854592"], ["Reder Adam", "775429859"], ["Kyselý Jan", "770319118"]],
@@ -76,12 +80,14 @@
             const h = ted.getHours();
             const m = ted.getMinutes();
             
+            // Lámání dne v 6:00 ráno
             let logickyDen = new Date(ted.getTime());
             if (h < 6) {
                 logickyDen.setDate(logickyDen.getDate() - 1);
             }
             logickyDen.setHours(0, 0, 0, 0);
 
+            // Výpočet indexu v 28denním cyklu
             const rozdilMs = logickyDen.getTime() - startDatum.getTime();
             let rozdilDnu = Math.floor(rozdilMs / (1000 * 60 * 60 * 24));
             while (rozdilDnu < 0) rozdilDnu += 28; 
@@ -89,26 +95,32 @@
             const denVCyklu = rozdilDnu % 28;
             const jeRanni = (h >= 6 && h < 18);
 
+            // Zjištění aktuální a příští směny
             let aktualniBarva;
             let pristiBarva;
 
             if (jeRanni) {
                 aktualniBarva = ranniCyklus[denVCyklu];
-                pristiBarva = nocniCyklus[denVCyklu];
+                pristiBarva = nocniCyklus[denVCyklu]; // Příští je noční stejného dne
             } else {
                 aktualniBarva = nocniCyklus[denVCyklu];
-                pristiBarva = ranniCyklus[(denVCyklu + 1) % 28];
+                // Příští je ranní následujícího dne
+                const pristiDenVCyklu = (denVCyklu + 1) % 28;
+                pristiBarva = ranniCyklus[pristiDenVCyklu];
             }
 
+            // Vykreslení hlavičky
             const hlavni = document.getElementById('hlavni');
             hlavni.className = 'hlavni-karta ' + aktualniBarva;
             document.getElementById('smena-text').innerText = aktualniBarva;
             document.getElementById('priste-text').innerText = "Příště: " + pristiBarva;
 
+            // Správný odpočet do konce
             let zbyvaMin;
             if (jeRanni) {
                 zbyvaMin = (18 * 60) - (h * 60 + m);
             } else {
+                // Noční: h je buď >=18 nebo <6
                 if (h >= 18) {
                     zbyvaMin = ((24 - h) * 60 - m) + (6 * 60);
                 } else {
@@ -117,6 +129,7 @@
             }
             document.getElementById('timer').innerText = `Končí za: ${Math.floor(zbyvaMin/60)}h ${zbyvaMin%60}m`;
 
+            // Vykreslení kontaktů
             let html = "";
             for (let profese in lide[aktualniBarva]) {
                 html += `<div class="nadpis-sekce">${profese}</div>`;
@@ -127,8 +140,8 @@
             document.getElementById('kontakty-vypis').innerHTML = html;
         }
 
-        setInterval(aktualizuj, 60000);
-        aktualizuj();
+        setInterval(aktualizuj, 60000); // Aktualizace každou minutu
+        aktualizuj(); // První spuštění
     </script>
 </body>
 </html>
