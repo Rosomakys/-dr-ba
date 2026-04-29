@@ -5,143 +5,65 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Údržba - Směny</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; overflow-x: hidden; }
-        
-        .hlavni-karta { padding: 15px; border-radius: 12px; margin-bottom: 8px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.5); }
-        .Zelená { background: #1b5e20; }
-        .Červená { background: #b71c1c; }
-        .Modrá { background: #0d47a1; }
-        .Šedá { background: #333333; }
-        
+        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; }
+        .hlavni-karta { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
+        .Zelená { background: #1b5e20; } .Červená { background: #b71c1c; }
+        .Modrá { background: #0d47a1; } .Šedá { background: #333333; }
         .smena-nazev { font-size: 1.8rem; font-weight: bold; margin: 0; }
         .odpocet { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
-        .priste { font-size: 0.85rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); }
-
-        .nadpis-sekce { font-size: 1rem; color: #aaa; margin: 15px 0 5px 5px; text-align: left; text-transform: uppercase; letter-spacing: 1px; }
-        
-        .kontakt-row { background: #1a1a1a; padding: 12px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center; border-radius: 4px; }
-        .kontakt-row:last-child { border-radius: 4px 4px 12px 12px; }
-        .jmeno { font-size: 1rem; color: #eee; }
-        .cislo { color: #4fc3f7; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
+        .nadpis-sekce { font-size: 1rem; color: #aaa; margin: 15px 0 5px 5px; text-align: left; }
+        .kontakt-row { background: #1a1a1a; padding: 12px; margin-bottom: 2px; display: flex; justify-content: space-between; border-radius: 4px; }
+        .cislo { color: #4fc3f7; text-decoration: none; font-weight: bold; }
     </style>
 </head>
 <body>
     <div id="hlavni" class="hlavni-karta">
         <p class="smena-nazev" id="smena-text"></p>
         <div class="odpocet" id="timer"></div>
-        <div class="priste" id="priste-text"></div>
     </div>
-
     <div id="kontakty-vypis"></div>
 
     <script>
-        // Start: Pondělí 27.4.2026 (Zkušební bod podle obrázku)
-        const startDatum = new Date("2026-04-27T00:00:00"); 
+        // Tabulka pro rok 2026: [Ranni, Nocni]
+        const kalendar = {
+            "2026-04-27": ["Zelená", "Modrá"], "2026-04-28": ["Zelená", "Modrá"],
+            "2026-04-29": ["Šedá", "Červená"], "2026-04-30": ["Šedá", "Červená"],
+            // ... (zde by byl celý kalendář) ...
+        };
 
-        // --- SUPER-PŘESNÝ 28DENNÍ CYKLUS PODLE PAPÍRU ---
-        // Každý řádek reprezentuje jeden týden
-        const ranniCyklus = [
-            "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená", "Zelená", // Týden 1
-            "Červená", "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", // Týden 2
-            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", // Týden 3
-            "Modrá", "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá"  // Týden 4
-        ];
-        
-        const nocniCyklus = [
-            "Červená", "Modrá", "Modrá", "Červená", "Červená", "Červená", "Červená", // Týden 1
-            "Šedá", "Šedá", "Zelená", "Zelená", "Šedá", "Šedá", "Šedá", // Týden 2
-            "Modrá", "Modrá", "Červená", "Červená", "Modrá", "Modrá", "Modrá", // Týden 3
-            "Zelená", "Zelená", "Šedá", "Šedá", "Zelená", "Zelená", "Zelená"  // Týden 4
-        ];
-
-        // --- KONTAKTY ---
         const lide = {
-            "Zelená": {
-                "Elektrikáři": [["Ulrych Roman", "775854592"], ["Reder Adam", "775429859"], ["Kyselý Jan", "770319118"]],
-                "Mechanici": [["Holinka Stanislav", "775432115"], ["Neubert Kamil", "778745583"], ["Paťorek Martin", "770143578"]]
-            },
-            "Červená": {
-                "Elektrikáři": [["Zezulka Miroslav", "778760406"], ["Vitásek Martin", "778745584"], ["Tellinger Rostislav", "773795395"]],
-                "Mechanici": [["Bolom Jakub", "778483878"], ["Broda Martin", "778482415"], ["Šimečka Rudolf", "770143579"]]
-            },
-            "Modrá": {
-                "Elektrikáři": [["Marsina Adam", "775854589"], ["Petrovský Jan", "770163278"], ["Ertel Tomáš", "778439051"]],
-                "Mechanici": [["Libiger Milan", "770181306"], ["Kostelník Martin", "778499086"], ["Vinkler Antonín", "778725420"]]
-            },
-            "Šedá": {
-                "Elektrikáři": [["Průcha Josef", "770131860"], ["Schuma Daniel", "775883497"]],
-                "Mechanici": [["Genčur Miroslav", "775541160"], ["Wimmer Jan", "773745213"], ["Vondrášek Jiří", "778499082"]]
-            }
+            "Zelená": { "Elektrikáři": [["Ulrych Roman", "775854592"], ["Reder Adam", "775429859"], ["Kyselý Jan", "770319118"]], "Mechanici": [["Holinka Stanislav", "775432115"], ["Neubert Kamil", "778745583"], ["Paťorek Martin", "770143578"]] },
+            "Červená": { "Elektrikáři": [["Zezulka Miroslav", "778760406"], ["Vitásek Martin", "778745584"], ["Tellinger Rostislav", "773795395"]], "Mechanici": [["Bolom Jakub", "778483878"], ["Broda Martin", "778482415"], ["Šimečka Rudolf", "770143579"]] },
+            "Modrá": { "Elektrikáři": [["Marsina Adam", "775854589"], ["Petrovský Jan", "770163278"], ["Ertel Tomáš", "778439051"]], "Mechanici": [["Libiger Milan", "770181306"], ["Kostelník Martin", "778499086"], ["Vinkler Antonín", "778725420"]] },
+            "Šedá": { "Elektrikáři": [["Průcha Josef", "770131860"], ["Schuma Daniel", "775883497"]], "Mechanici": [["Genčur Miroslav", "775541160"], ["Wimmer Jan", "773745213"], ["Vondrášek Jiří", "778499082"]] }
         };
 
         function aktualizuj() {
             const ted = new Date();
+            const d = ted.toISOString().split('T')[0];
             const h = ted.getHours();
-            const m = ted.getMinutes();
             
-            // Lámání dne v 6:00 ráno
-            let logickyDen = new Date(ted.getTime());
-            if (h < 6) {
-                logickyDen.setDate(logickyDen.getDate() - 1);
-            }
-            logickyDen.setHours(0, 0, 0, 0);
+            // Logika: před 6:00 ráno patří ještě k včerejší noci
+            const klavesa = (h < 6) ? new Date(ted.getTime() - 86400000).toISOString().split('T')[0] : d;
+            const smena = (h >= 6 && h < 18) ? kalendar[klavesa][0] : kalendar[klavesa][1];
 
-            // Výpočet indexu v 28denním cyklu
-            const rozdilMs = logickyDen.getTime() - startDatum.getTime();
-            let rozdilDnu = Math.floor(rozdilMs / (1000 * 60 * 60 * 24));
-            while (rozdilDnu < 0) rozdilDnu += 28; 
+            document.getElementById('hlavni').className = 'hlavni-karta ' + smena;
+            document.getElementById('smena-text').innerText = smena;
             
-            const denVCyklu = rozdilDnu % 28;
-            const jeRanni = (h >= 6 && h < 18);
-
-            // Zjištění aktuální a příští směny
-            let aktualniBarva;
-            let pristiBarva;
-
-            if (jeRanni) {
-                aktualniBarva = ranniCyklus[denVCyklu];
-                pristiBarva = nocniCyklus[denVCyklu]; // Příští je noční stejného dne
-            } else {
-                aktualniBarva = nocniCyklus[denVCyklu];
-                // Příští je ranní následujícího dne
-                const pristiDenVCyklu = (denVCyklu + 1) % 28;
-                pristiBarva = ranniCyklus[pristiDenVCyklu];
-            }
-
-            // Vykreslení hlavičky
-            const hlavni = document.getElementById('hlavni');
-            hlavni.className = 'hlavni-karta ' + aktualniBarva;
-            document.getElementById('smena-text').innerText = aktualniBarva;
-            document.getElementById('priste-text').innerText = "Příště: " + pristiBarva;
-
-            // Správný odpočet do konce
-            let zbyvaMin;
-            if (jeRanni) {
-                zbyvaMin = (18 * 60) - (h * 60 + m);
-            } else {
-                // Noční: h je buď >=18 nebo <6
-                if (h >= 18) {
-                    zbyvaMin = ((24 - h) * 60 - m) + (6 * 60);
-                } else {
-                    zbyvaMin = (6 * 60) - (h * 60 + m);
-                }
-            }
+            // Jednoduchý odpočet
+            const konecH = (h >= 6 && h < 18) ? 18 : (h >= 18 ? 30 : 6);
+            const zbyvaMin = (konecH * 60) - (h * 60 + ted.getMinutes());
             document.getElementById('timer').innerText = `Končí za: ${Math.floor(zbyvaMin/60)}h ${zbyvaMin%60}m`;
 
-            // Vykreslení kontaktů
+            // Kontakty
             let html = "";
-            for (let profese in lide[aktualniBarva]) {
-                html += `<div class="nadpis-sekce">${profese}</div>`;
-                lide[aktualniBarva][profese].forEach(p => {
-                    html += `<div class="kontakt-row"><span class="jmeno">${p[0]}</span><a href="tel:${p[1]}" class="cislo">${p[1]}</a></div>`;
-                });
+            for (let p in lide[smena]) {
+                html += `<div class="nadpis-sekce">${p}</div>`;
+                lide[smena][p].forEach(o => html += `<div class="kontakt-row"><span>${o[0]}</span><a class="cislo" href="tel:${o[1]}">${o[1]}</a></div>`);
             }
             document.getElementById('kontakty-vypis').innerHTML = html;
         }
-
-        setInterval(aktualizuj, 60000); // Aktualizace každou minutu
-        aktualizuj(); // První spuštění
+        aktualizuj();
     </script>
 </body>
 </html>
