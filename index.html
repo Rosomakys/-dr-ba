@@ -5,40 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Údržba - Směny</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; }
-        .box { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
+        body { font-family: -apple-system, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; overflow-x: hidden; }
+        .hlavni-karta { padding: 15px; border-radius: 12px; margin-bottom: 8px; text-align: center; }
         .Zelená { background: #1b5e20; } .Červená { background: #b71c1c; }
         .Modrá { background: #0d47a1; } .Šedá { background: #333333; }
-        .Chyba { background: #880000; }
+        
         .smena-nazev { font-size: 1.8rem; font-weight: bold; margin: 0; }
         .odpocet { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
-        .nadpis { font-size: 0.9rem; color: #aaa; margin: 15px 0 5px 5px; text-transform: uppercase; }
+        .priste { font-size: 0.85rem; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.2); }
+
+        .nadpis-sekce { font-size: 1rem; color: #aaa; margin: 15px 0 5px 5px; text-transform: uppercase; }
         .karta { background: #1a1a1a; padding: 12px; margin: 2px 0; display: flex; justify-content: space-between; border-radius: 4px; }
         .cislo { color: #4fc3f7; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div id="vysledek" class="box"></div>
-    <div id="timer" style="text-align: center; color: #aaa;"></div>
+    <div id="hlavni" class="hlavni-karta">
+        <p class="smena-nazev" id="smena-text"></p>
+        <div class="odpocet" id="timer"></div>
+        <div class="priste" id="priste-text"></div>
+    </div>
     <div id="kontakty-vypis"></div>
 
     <script>
-        // TABULKA SMĚN: [Ranní, Noční]
-        const kalendar = {
-            "2026-04-27": ["Zelená", "Modrá"], "2026-04-28": ["Zelená", "Modrá"],
-            "2026-04-29": ["Šedá", "Šedá"], "2026-04-30": ["Zelená", "Zelená"],
-            "2026-05-01": ["Zelená", "Modrá"], "2026-05-02": ["Zelená", "Modrá"], "2026-05-03": ["Modrá", "Modrá"],
-            "2026-05-04": ["Modrá", "Červená"], "2026-05-05": ["Modrá", "Červená"], "2026-05-06": ["Červená", "Červená"],
-            "2026-05-07": ["Červená", "Šedá"], "2026-05-08": ["Červená", "Šedá"], "2026-05-09": ["Šedá", "Šedá"],
-            "2026-05-10": ["Šedá", "Zelená"], "2026-05-11": ["Zelená", "Zelená"], "2026-05-12": ["Zelená", "Zelená"],
-            "2026-05-13": ["Zelená", "Modrá"], "2026-05-14": ["Zelená", "Modrá"], "2026-05-15": ["Modrá", "Modrá"],
-            "2026-05-16": ["Modrá", "Červená"], "2026-05-17": ["Modrá", "Červená"], "2026-05-18": ["Červená", "Červená"],
-            "2026-05-19": ["Červená", "Šedá"], "2026-05-20": ["Červená", "Šedá"], "2026-05-21": ["Šedá", "Šedá"],
-            "2026-05-22": ["Šedá", "Zelená"], "2026-05-23": ["Zelená", "Zelená"], "2026-05-24": ["Zelená", "Zelená"],
-            "2026-05-25": ["Zelená", "Modrá"], "2026-05-26": ["Zelená", "Modrá"], "2026-05-27": ["Modrá", "Modrá"],
-            "2026-05-28": ["Modrá", "Červená"], "2026-05-29": ["Modrá", "Červená"], "2026-05-30": ["Červená", "Červená"],
-            "2026-05-31": ["Červená", "Šedá"]
-        };
+        const c = "Červená", z = "Zelená", m = "Modrá", s = "Šedá";
+        
+        // 56denní přesný cyklus [Ranní, Noční]
+        const cyklus56 = [
+            [c,z], [c,z], [s,m], [s,m], [z,c], [z,c], [z,c], // Týden 1
+            [s,m], [s,m], [z,c], [z,c], [m,s], [m,s], [m,s], // Týden 2
+            [c,z], [c,z], [m,s], [m,s], [c,z], [c,z], [c,z], // Týden 3
+            [s,m], [s,m], [z,c], [z,c], [s,m], [s,m], [s,m], // Týden 4
+            [z,c], [z,c], [m,s], [m,s], [c,z], [c,z], [c,z], // Týden 5
+            [m,s], [m,s], [c,z], [c,z], [s,m], [s,m], [s,m], // Týden 6
+            [z,c], [z,c], [s,m], [s,m], [z,c], [z,c], [z,c], // Týden 7
+            [m,s], [m,s], [c,z], [c,z], [m,s], [m,s], [m,s]  // Týden 8
+        ];
+
+        // Referenční bod: Pondělí 29. prosince 2025 (start Týdne 1)
+        const refDatum = new Date(2025, 11, 29); // 11 = Prosinec
 
         const lide = {
             "Zelená": { "Elektrikáři": [["Ulrych Roman", "775854592"], ["Reder Adam", "775429859"], ["Kyselý Jan", "770319118"]], "Mechanici": [["Holinka Stanislav", "775432115"], ["Neubert Kamil", "778745583"], ["Paťorek Martin", "770143578"]] },
@@ -47,51 +52,44 @@
             "Šedá": { "Elektrikáři": [["Průcha Josef", "770131860"], ["Schuma Daniel", "775883497"]], "Mechanici": [["Genčur Miroslav", "775541160"], ["Wimmer Jan", "773745213"], ["Vondrášek Jiří", "778499082"]] }
         };
 
-        // Pomocná funkce pro zisk data v lokálním čase (RRRR-MM-DD)
-        function formatDate(dateObj) {
-            const y = dateObj.getFullYear();
-            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const d = String(dateObj.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
         function aktualizuj() {
             const ted = new Date();
             const h = ted.getHours();
             
-            // Pokud je před 6:00, bereme datum včerejška
-            const logickyDen = (h < 6) ? new Date(ted.getTime() - 86400000) : ted;
-            const klavesa = formatDate(logickyDen);
+            // Posuneme čas o 6 hodin zpět, aby se "logický den" překlopil až v 6:00
+            const logickyCas = new Date(ted.getTime() - 6 * 60 * 60 * 1000);
+            const logickyDen = new Date(logickyCas.getFullYear(), logickyCas.getMonth(), logickyCas.getDate());
             
-            // Zjištění směny z tabulky
-            let smena = "Neznámá data";
-            if (kalendar[klavesa]) {
-                smena = (h >= 6 && h < 18) ? kalendar[klavesa][0] : kalendar[klavesa][1];
-            }
+            // Výpočet indexu v 56denním cyklu
+            const rozdilDnu = Math.floor((logickyDen - refDatum) / (1000 * 60 * 60 * 24));
+            const indexDne = ((rozdilDnu % 56) + 56) % 56;
             
-            // Barva boxu
-            let tridaBarvy = lide[smena] ? smena : "Chyba";
-            document.getElementById('vysledek').className = 'box ' + tridaBarvy;
-            document.getElementById('vysledek').innerHTML = `<p class='smena-nazev'>${smena}</p>`;
+            const jeDen = (h >= 6 && h < 18);
+            
+            // Určení aktuální a příští směny
+            const aktualniSmena = jeDen ? cyklus56[indexDne][0] : cyklus56[indexDne][1];
+            const pristiSmena = jeDen ? cyklus56[indexDne][1] : cyklus56[(indexDne + 1) % 56][0];
 
-            // Odpočet do 6:00 nebo 18:00
-            const konecH = (h >= 6 && h < 18) ? 18 : (h >= 18 ? 30 : 6);
+            // Vykreslení UI
+            const hlavni = document.getElementById('hlavni');
+            hlavni.className = 'hlavni-karta ' + aktualniSmena;
+            document.getElementById('smena-text').innerText = aktualniSmena;
+            document.getElementById('priste-text').innerText = "Příště: " + pristiSmena;
+
+            // Odpočet
+            const konecH = jeDen ? 18 : (h >= 18 ? 30 : 6);
             const minZbyva = (konecH * 60) - (h * 60 + ted.getMinutes());
             document.getElementById('timer').innerText = `Končí za: ${Math.floor(minZbyva/60)}h ${minZbyva%60}m`;
 
             // Kontakty
             let html = "";
-            if (lide[smena]) {
-                for (let profese in lide[smena]) {
-                    html += `<div class="nadpis">${profese}</div>`;
-                    lide[smena][profese].forEach(o => html += `<div class="karta"><span>${o[0]}</span><a class="cislo" href="tel:${o[1]}">${o[1]}</a></div>`);
-                }
-            } else {
-                html = "<p style='color:#aaa; text-align:center;'>Pro tento den chybí data v kalendáři.</p>";
+            for (let profese in lide[aktualniSmena]) {
+                html += `<div class="nadpis-sekce">${profese}</div>`;
+                lide[aktualniSmena][profese].forEach(o => html += `<div class="karta"><span>${o[0]}</span><a class="cislo" href="tel:${o[1]}">${o[1]}</a></div>`);
             }
             document.getElementById('kontakty-vypis').innerHTML = html;
         }
-        
+
         aktualizuj();
         setInterval(aktualizuj, 60000);
     </script>
