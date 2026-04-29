@@ -6,29 +6,36 @@
     <title>Údržba - Směny</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #000; color: #fff; margin: 0; padding: 10px; }
-        .hlavni-karta { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
+        .box { padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; }
         .Zelená { background: #1b5e20; } .Červená { background: #b71c1c; }
         .Modrá { background: #0d47a1; } .Šedá { background: #333333; }
         .smena-nazev { font-size: 1.8rem; font-weight: bold; margin: 0; }
         .odpocet { font-size: 0.9rem; opacity: 0.8; margin-top: 5px; }
-        .nadpis-sekce { font-size: 1rem; color: #aaa; margin: 15px 0 5px 5px; text-align: left; }
-        .kontakt-row { background: #1a1a1a; padding: 12px; margin-bottom: 2px; display: flex; justify-content: space-between; border-radius: 4px; }
-        .cislo { color: #4fc3f7; text-decoration: none; font-weight: bold; }
+        .nadpis { font-size: 0.9rem; color: #aaa; margin: 15px 0 5px 5px; text-transform: uppercase; }
+        .karta { background: #1a1a1a; padding: 12px; margin: 2px 0; display: flex; justify-content: space-between; border-radius: 4px; }
+        .cislo { color: #4fc3f7; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
-    <div id="hlavni" class="hlavni-karta">
-        <p class="smena-nazev" id="smena-text"></p>
-        <div class="odpocet" id="timer"></div>
-    </div>
+    <div id="vysledek" class="box"></div>
+    <div id="timer" style="text-align: center; color: #aaa;"></div>
     <div id="kontakty-vypis"></div>
 
     <script>
-        // Tabulka pro rok 2026: [Ranni, Nocni]
+        // TABULKA SMĚN: [Ranní, Noční]
         const kalendar = {
-            "2026-04-27": ["Zelená", "Modrá"], "2026-04-28": ["Zelená", "Modrá"],
-            "2026-04-29": ["Šedá", "Červená"], "2026-04-30": ["Šedá", "Červená"],
-            // ... (zde by byl celý kalendář) ...
+            "2026-04-29": ["Šedá", "Šedá"], "2026-04-30": ["Zelená", "Zelená"],
+            "2026-05-01": ["Zelená", "Modrá"], "2026-05-02": ["Zelená", "Modrá"], "2026-05-03": ["Modrá", "Modrá"],
+            "2026-05-04": ["Modrá", "Červená"], "2026-05-05": ["Modrá", "Červená"], "2026-05-06": ["Červená", "Červená"],
+            "2026-05-07": ["Červená", "Šedá"], "2026-05-08": ["Červená", "Šedá"], "2026-05-09": ["Šedá", "Šedá"],
+            "2026-05-10": ["Šedá", "Zelená"], "2026-05-11": ["Zelená", "Zelená"], "2026-05-12": ["Zelená", "Zelená"],
+            "2026-05-13": ["Zelená", "Modrá"], "2026-05-14": ["Zelená", "Modrá"], "2026-05-15": ["Modrá", "Modrá"],
+            "2026-05-16": ["Modrá", "Červená"], "2026-05-17": ["Modrá", "Červená"], "2026-05-18": ["Červená", "Červená"],
+            "2026-05-19": ["Červená", "Šedá"], "2026-05-20": ["Červená", "Šedá"], "2026-05-21": ["Šedá", "Šedá"],
+            "2026-05-22": ["Šedá", "Zelená"], "2026-05-23": ["Zelená", "Zelená"], "2026-05-24": ["Zelená", "Zelená"],
+            "2026-05-25": ["Zelená", "Modrá"], "2026-05-26": ["Zelená", "Modrá"], "2026-05-27": ["Modrá", "Modrá"],
+            "2026-05-28": ["Modrá", "Červená"], "2026-05-29": ["Modrá", "Červená"], "2026-05-30": ["Červená", "Červená"],
+            "2026-05-31": ["Červená", "Šedá"]
         };
 
         const lide = {
@@ -40,30 +47,27 @@
 
         function aktualizuj() {
             const ted = new Date();
-            const d = ted.toISOString().split('T')[0];
+            let d = ted.toISOString().split('T')[0];
             const h = ted.getHours();
+            if (h < 6) { d = new Date(ted.getTime() - 86400000).toISOString().split('T')[0]; }
             
-            // Logika: před 6:00 ráno patří ještě k včerejší noci
-            const klavesa = (h < 6) ? new Date(ted.getTime() - 86400000).toISOString().split('T')[0] : d;
-            const smena = (h >= 6 && h < 18) ? kalendar[klavesa][0] : kalendar[klavesa][1];
+            const smena = (h >= 6 && h < 18) ? kalendar[d][0] : kalendar[d][1];
+            document.getElementById('vysledek').className = 'box ' + smena;
+            document.getElementById('vysledek').innerHTML = `<p class='smena-nazev'>${smena}</p>`;
 
-            document.getElementById('hlavni').className = 'hlavni-karta ' + smena;
-            document.getElementById('smena-text').innerText = smena;
-            
-            // Jednoduchý odpočet
             const konecH = (h >= 6 && h < 18) ? 18 : (h >= 18 ? 30 : 6);
-            const zbyvaMin = (konecH * 60) - (h * 60 + ted.getMinutes());
-            document.getElementById('timer').innerText = `Končí za: ${Math.floor(zbyvaMin/60)}h ${zbyvaMin%60}m`;
+            const minZbyva = (konecH * 60) - (h * 60 + ted.getMinutes());
+            document.getElementById('timer').innerText = `Končí za: ${Math.floor(minZbyva/60)}h ${minZbyva%60}m`;
 
-            // Kontakty
             let html = "";
-            for (let p in lide[smena]) {
-                html += `<div class="nadpis-sekce">${p}</div>`;
-                lide[smena][p].forEach(o => html += `<div class="kontakt-row"><span>${o[0]}</span><a class="cislo" href="tel:${o[1]}">${o[1]}</a></div>`);
+            for (let profese in lide[smena]) {
+                html += `<div class="nadpis">${profese}</div>`;
+                lide[smena][profese].forEach(o => html += `<div class="karta"><span>${o[0]}</span><a class="cislo" href="tel:${o[1]}">${o[1]}</a></div>`);
             }
             document.getElementById('kontakty-vypis').innerHTML = html;
         }
         aktualizuj();
+        setInterval(aktualizuj, 60000);
     </script>
 </body>
 </html>
