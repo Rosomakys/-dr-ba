@@ -51,7 +51,7 @@
             const h = ted.getHours();
             if (h < 6) { d = new Date(ted.getTime() - 86400000).toISOString().split('T')[0]; }
             
-            const smena = (h >= 6 && h < 18) ? kalendar[d][0] : kalendar[d][1];
+            const smena = (kalendar[d] && h >= 6 && h < 18) ? kalendar[d][0] : (kalendar[d] ? kalendar[d][1] : "Chyba dat");
             document.getElementById('vysledek').className = 'box ' + smena;
             document.getElementById('vysledek').innerHTML = `<p class='smena-nazev'>${smena}</p>`;
 
